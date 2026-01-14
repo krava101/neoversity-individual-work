@@ -2,33 +2,77 @@ from collections import UserDict
 
 class Field:
     def __init__(self, value):
-        self.value = value
+        self.value = value  
 
     def __str__(self):
         return str(self.value)
 
-class Name:
-    # реалізація класу
+class Name(Field):
+    def __init__(self, value: str):
+        if value is None or not value.strip():
+            raise ValueError("Name є обов'язковим!")
+        super().__init__(value.strip())
     ...
 
-class Phone:
-    # реалізація класу
+class Phone(Field):
+    def __init__(self, value: str):
+        if len(value) != 10 or not value.isdigit():
+            raise ValueError("Phone повинен складатись з 10 цифр!")
+        super().__init__(value)
     ...
 
 class Record:
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = Name(name)
         self.phones = []
 
-    # реалізація класу
+    def add_phone(self, phone):
+        self.phones.append(Phone(phone))
 
+    def remove_phone(self, phone: str):
+        phone_field = Phone(phone)
+        for p in self.phones:
+            if p.value == phone_field.value:
+                self.phones.remove(p)
+                return
+        raise ValueError(f'Номер "{phone}" не знайдено!')
+    
+    def find_phone(self, phone: str):
+        phone_field = Phone(phone)
+        for p in self.phones:
+            if p.value == phone_field.value:
+                return p
+        return None
+    
+    def edit_phone(self, old_phone: str, new_phone: str):
+        phone_field = Phone(old_phone)
+        new_phone_field = Phone(new_phone)
+        for i, p in enumerate(self.phones):
+            if p.value == phone_field.value:
+                self.phones[i] = new_phone_field
+                return
+        raise ValueError(f'Номер "{old_phone}" не знайдено!')
+                
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}"
 
-class AddressBook:
-    # реалізація класу
+class AddressBook(UserDict):
+    def add_record(self, record: Record):
+        self.data[record.name.value] = record
+
+    def find(self, name: str):
+        if name is None or not name.strip():
+            raise ValueError("Введіть ім'я!")
+        return self.data.get(name.strip())
+    
+    def delete(self, name: str):
+        if name is None or not name.strip():
+            raise ValueError("Введіть ім'я!")
+        return self.data.pop(name.strip(), None)
+
     ...
 
+# Міні перевірка
 if __name__ == "__main__":
         # Створення нової адресної книги
     book = AddressBook()
